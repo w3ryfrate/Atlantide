@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ProjectNewWorld.Core": {
+      "commandName": "Project",
+      "workingDirectory": "$(SolutionDir)"
+    }
+  }
+}
