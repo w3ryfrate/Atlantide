@@ -9,22 +9,17 @@ public class Shader : DisposableObject
     private bool _disposed = false;
     private readonly GL _gl;
 
-    public Shader(GL gl, ShaderType type)
+    public Shader(GL gl, string source, ShaderType type)
     {
         _gl = gl;
         Handle = _gl.CreateShader(type);
         Type = type;
-    }
-
-    public void SetSource(string source)
-    {
-        ThrowIfDisposed<Shader>();
         _gl.ShaderSource(Handle, source);
+        this.Compile();
     }
 
-    public void Compile()
+    private void Compile()
     {
-        ThrowIfDisposed<Shader>();
         _gl.CompileShader(Handle);
         _gl.GetShader(Handle, ShaderParameterName.CompileStatus, out int compStatus);
         if (compStatus == (int)GLEnum.False)
@@ -35,6 +30,7 @@ public class Shader : DisposableObject
 
     public void Delete()
     {
+        ThrowIfDisposed<Shader>();
         if (Handle != 0)
         {
             _gl.DeleteShader(Handle);

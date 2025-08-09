@@ -4,10 +4,10 @@ using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using System.Drawing;
 using System.Numerics;
-using StbImageSharp;
 using ProjectNewWorld.Core.Objects;
 using Shader = ProjectNewWorld.Core.Objects.Shader;
-using System.Diagnostics;
+using Silk.NET.Input;
+using ProjectNewWorld.Core.Camera;
 
 namespace ProjectNewWorld.Core;
 
@@ -15,8 +15,10 @@ public class GameEngine
 {
     public readonly IWindow MainWindow;
     public GraphicsHandler GraphicsHandler { get; private set; }
-    private GL _gl;
+    public IInputContext Input { get; private set; }
+    public BaseCamera Camera { get; private set; }
 
+    private GL _gl;
     private Rectangle _rectangle;
 
     ShaderProgram shaderProgram;
@@ -29,6 +31,7 @@ public class GameEngine
     {
         MainWindow = Window.Create(WindowOptions.Default);
         MainWindow.VSync = true;
+        MainWindow.Size = new(800, 600);
         MainWindow.WindowBorder = WindowBorder.Fixed;
         MainWindow.ShouldSwapAutomatically = false;
 
@@ -41,21 +44,17 @@ public class GameEngine
     private unsafe void OnLoad()
     {
         _gl = MainWindow.CreateOpenGL();
+        Input = MainWindow.CreateInput();
+
+        Camera = new FreeViewCamera(Vector3.Zero);
         GraphicsHandler = new(_gl, this);
         GraphicsHandler.SetViewport(new(800, 600));
-        //_graphicsHandler.View = Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY);
-        //_graphicsHandler.Projection = Matrix4x4.CreatePerspectiveFieldOfView(1.3f, _graphicsHandler.Viewport.GetAspectRatio(), 0.1f, 100f);
 
         string vertexCode = File.ReadAllText("Shaders\\plain_vert.shader");
         string fragmentCode = File.ReadAllText("Shaders\\plain_frag.shader");
 
-        vertShader = new(_gl, ShaderType.VertexShader);
-        vertShader.SetSource(vertexCode);
-        vertShader.Compile();
-
-        fragShader = new(_gl, ShaderType.FragmentShader);
-        fragShader.SetSource(fragmentCode);
-        fragShader.Compile();
+        vertShader = new(_gl, vertexCode, ShaderType.VertexShader);
+        fragShader = new(_gl,fragmentCode, ShaderType.FragmentShader);
 
         shaderProgram = new(_gl);
         shaderProgram.AttachShader(vertShader);
@@ -67,21 +66,20 @@ public class GameEngine
         vertShader.Dispose();
         fragShader.Dispose();
 
-        _rectangle = new(_gl, shaderProgram, Matrix4x4.Identity, GraphicsHandler);
+        _rectangle = new(_gl, shaderProgram, Matrix4x4.Identity, this);
     }
 
     private void OnUpdate(double delta)
     {
-        if (!_rectangle.Disposed)
-            _rectangle.Update(delta);
+        Camera.Update(Input.Keyboards[0]);
+        _rectangle.Update(delta);
     }
 
-    private unsafe void OnRender(double delta)
+    private void OnRender(double delta)
     {
         GraphicsHandler.Clear(Color.CornflowerBlue);
 
-        if (!_rectangle.Disposed) 
-            _rectangle.Draw();
+        _rectangle.Draw(Camera);
 
         MainWindow.SwapBuffers();
     }

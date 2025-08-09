@@ -16,4 +16,7 @@ public static class MathHelper
 
         return array;
     }
+
+    public static double ToDegrees(this double radians) => radians * 180.0d / Math.PI;
+    public static double ToRadians(this double degrees) => degrees * Math.PI / 180.0d;
 }

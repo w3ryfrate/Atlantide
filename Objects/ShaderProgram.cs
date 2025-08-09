@@ -76,7 +76,7 @@ public class ShaderProgram : DisposableObject
         ThrowIfDisposed<ShaderProgram>();
         int loc = _gl.GetUniformLocation(Handle, name);
         if (loc == -1)
-            throw new ArgumentException("Uniform not found!");
+            throw new ArgumentException("Error::Uniform not found!::" + name);
 
         _gl.Uniform1(loc, value);
     }
@@ -86,7 +86,7 @@ public class ShaderProgram : DisposableObject
         ThrowIfDisposed<ShaderProgram>();
         int loc = _gl.GetUniformLocation(Handle, name);
         if (loc == -1)
-            throw new ArgumentException("Uniform not found!");
+            throw new ArgumentException("Error::Uniform not found!::" + name);
 
         _gl.UniformMatrix4(loc, true, value.FormatAsArray());
     }

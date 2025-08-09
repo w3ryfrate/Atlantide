@@ -4,8 +4,7 @@ namespace ProjectNewWorld.Core;
 
 public class GraphicsHandler
 {
-    public Matrix4x4 Projection;
-    public Matrix4x4 View;
+    public Matrix4x4 Projection { get; private set; }
     public Viewport Viewport { get; private set; }
 
     private readonly GL _gl;
@@ -21,6 +20,7 @@ public class GraphicsHandler
     {
         Viewport = viewport;
         _engine.MainWindow.Size = new(Viewport.Width, Viewport.Height);
+        Projection = Matrix4x4.CreatePerspectiveFieldOfView(_engine.Camera.FieldOfView, Viewport.GetAspectRatio(), 0.1f, 100f);
         _gl.Viewport(0, 0, (uint)Viewport.Width, (uint)Viewport.Height);
     }
 

@@ -27,6 +27,7 @@ public class VertexArrayObject : DisposableObject
 
     public void Delete()
     {
+        ThrowIfDisposed<VertexArrayObject>();
         _gl.DeleteVertexArray(Handle);
         Handle = 0;
     }

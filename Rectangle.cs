@@ -1,4 +1,6 @@
-﻿using ProjectNewWorld.Core.Objects;
+﻿using ProjectNewWorld.Core.Camera;
+using ProjectNewWorld.Core.Helpers;
+using ProjectNewWorld.Core.Objects;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
@@ -8,9 +10,6 @@ public class Rectangle : RenderableObject
 {
     private BufferObject _ebo;
     private const float _zApos = -1f;
-
-    private Matrix4x4 _view;
-    private Matrix4x4 _projection;
 
     protected override float[] Vertices => _vertices;
     private float[] _vertices =
@@ -28,10 +27,8 @@ public class Rectangle : RenderableObject
         1u, 2u, 3u
     };
 
-    public Rectangle(GL gl, ShaderProgram program, Matrix4x4 model, GraphicsHandler graphics) : base(gl, graphics, program, model)
+    public Rectangle(GL gl, ShaderProgram program, Matrix4x4 model, GameEngine engine) : base(gl, engine, program, model)
     {
-        Model = Matrix4x4.Identity;
-
         VAO.Bind();
 
         VBO.Bind();
@@ -52,9 +49,6 @@ public class Rectangle : RenderableObject
         gl.EnableVertexAttribArray(0);
         gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
-        _view = Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.UnitZ, Vector3.UnitY);
-        _projection = Matrix4x4.CreatePerspectiveFieldOfView(1.3f, Graphics.Viewport.GetAspectRatio(), 0.1f, 100f);
-
         VAO.Unbind();
         VBO.Unbind();
         _ebo.Unbind();
@@ -68,13 +62,9 @@ public class Rectangle : RenderableObject
         ShaderProgram.SetUniform1("uTime", time);
     }
 
-    public override void Draw()
+    public override void Draw(BaseCamera camera)
     {
-        base.Draw();
-        ShaderProgram.SetUniformMat4("uView", _view);
-        ShaderProgram.SetUniformMat4("uProjection", _projection);
-        ShaderProgram.Use();
-        VAO.Bind();
+        base.Draw(camera);
         unsafe
         {
             gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
