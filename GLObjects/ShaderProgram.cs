@@ -2,7 +2,7 @@
 using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Objects;
+namespace ProjectNewWorld.Core.GLObjects;
 
 public class ShaderProgram : DisposableObject
 {

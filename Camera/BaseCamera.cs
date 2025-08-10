@@ -1,25 +1,35 @@
 ﻿using ProjectNewWorld.Core.Helpers;
-using Silk.NET.Input;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Camera;
+namespace ProjectNewWorld.Core.Cameras;
 
 public abstract class BaseCamera
 {
     public Vector3 Position { get; protected set; }
     public Vector3 Target { get; protected set; }
 
-    public float FieldOfView { get; protected set; } 
     public Matrix4x4 View { get; protected set; }
 
-    public BaseCamera(Vector3 initialPosition)
+    public float FieldOfView { get; protected set; } 
+    public float Velocity { get; protected set; }
+
+    protected readonly Vector3 _initialPosition;
+    protected readonly Vector3 _initialTarget;
+    protected readonly GameEngine _engine;
+
+    public BaseCamera(GameEngine engine, Vector3 initialPosition, Vector3 initialTarget)
     {
+        _initialPosition = initialPosition;
+        _initialTarget = initialTarget;
+        _engine = engine;
         Position = initialPosition;
+        Target = initialTarget;
         FieldOfView = (float)MathHelper.ToRadians(80d);
+        Velocity = 10f;
     }
 
-    public virtual void Update(IKeyboard keyboard)
+    public virtual void Update(double delta)
     {
-        View = Matrix4x4.CreateLookAt(Position, Target, Vector3.UnitY);
+        View = Matrix4x4.CreateLookAt(Position, Position + Target, Vector3.UnitY);
     }
 }

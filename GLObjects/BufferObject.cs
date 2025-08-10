@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.Objects;
+namespace ProjectNewWorld.Core.GLObjects;
 
 public class BufferObject : DisposableObject
 {

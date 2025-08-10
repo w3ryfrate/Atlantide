@@ -1,24 +1,21 @@
-﻿using ProjectNewWorld.Core.Camera;
-using ProjectNewWorld.Core.Helpers;
-using ProjectNewWorld.Core.Objects;
+﻿using ProjectNewWorld.Core.GLObjects;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core;
+namespace ProjectNewWorld.Core.Objects;
 
 public class Rectangle : RenderableObject
 {
     private BufferObject _ebo;
-    private const float _zApos = -1f;
 
     protected override float[] Vertices => _vertices;
     private float[] _vertices =
     {
         //aPosition     
-         0.5f,  0.5f, _zApos,
-         0.5f, -0.5f, _zApos,
-        -0.5f, -0.5f, _zApos,
-        -0.5f,  0.5f, _zApos,   
+         0.5f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f,   
     };
 
     private readonly uint[] indices =
@@ -27,7 +24,7 @@ public class Rectangle : RenderableObject
         1u, 2u, 3u
     };
 
-    public Rectangle(GL gl, ShaderProgram program, Matrix4x4 model, GameEngine engine) : base(gl, engine, program, model)
+    public Rectangle(ShaderProgram program, GameEngine engine, Vector3 position) : base(program, engine, position)
     {
         VAO.Bind();
 
@@ -54,17 +51,14 @@ public class Rectangle : RenderableObject
         _ebo.Unbind();
     }
 
-    float time = 0f;
     public override void Update(double deltaTime)
     {
         base.Update(deltaTime);
-        time += (float)deltaTime;
-        ShaderProgram.SetUniform1("uTime", time);
     }
 
-    public override void Draw(BaseCamera camera)
+    public override void Draw()
     {
-        base.Draw(camera);
+        base.Draw();
         unsafe
         {
             gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
