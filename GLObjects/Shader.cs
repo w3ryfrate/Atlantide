@@ -9,12 +9,12 @@ public class Shader : DisposableObject
     private bool _disposed = false;
     private readonly GL _gl;
 
-    public Shader(GL gl, string source, ShaderType type)
+    public Shader(GL gl, string file, ShaderType type)
     {
         _gl = gl;
         Handle = _gl.CreateShader(type);
         Type = type;
-        _gl.ShaderSource(Handle, source);
+        _gl.ShaderSource(Handle, File.ReadAllText(file));
         this.Compile();
     }
 

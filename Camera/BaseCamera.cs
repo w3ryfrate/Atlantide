@@ -1,4 +1,5 @@
 ﻿using ProjectNewWorld.Core.Helpers;
+using ProjectNewWorld.Core.Objects;
 using System.Numerics;
 
 namespace ProjectNewWorld.Core.Cameras;
@@ -30,6 +31,15 @@ public abstract class BaseCamera
 
     public virtual void Update(double delta)
     {
-        View = Matrix4x4.CreateLookAt(Position, Position + Target, Vector3.UnitY);
+        View = Matrix4x4.CreateLookAt(Position, Target, Vector3.UnitY);
+    }
+
+    /// <summary>
+    /// Resets the camera to its initial properties.
+    /// </summary>
+    public virtual void Reset()
+    {
+        this.Position = _initialPosition;
+        this.Target = _initialTarget;
     }
 }

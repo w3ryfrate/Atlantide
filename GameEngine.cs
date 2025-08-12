@@ -14,11 +14,12 @@ namespace ProjectNewWorld.Core;
 public class GameEngine
 {
     public readonly IWindow MainWindow;
+
+    public GL GL { get; private set; }
     public GraphicsHandler GraphicsHandler { get; private set; }
     public InputHandler InputHandler { get; private set; }
     public BaseCamera Camera { get; private set; }
 
-    private GL _gl;
     private IInputContext _input;
 
     private Objects.Rectangle _rectangle;
@@ -31,6 +32,7 @@ public class GameEngine
     public GameEngine()
     {
         MainWindow = Window.Create(WindowOptions.Default);
+        MainWindow.FramesPerSecond = 75;
         MainWindow.VSync = true;
         MainWindow.WindowBorder = WindowBorder.Fixed;
         MainWindow.ShouldSwapAutomatically = false;
@@ -44,31 +46,30 @@ public class GameEngine
     private unsafe void OnLoad()
     {
         MainWindow.Center();
-        _gl = MainWindow.CreateOpenGL();
+        GL = MainWindow.CreateOpenGL();
         _input = MainWindow.CreateInput();
 
         InputHandler = new(_input);
-        Camera = new FreeViewCamera(this, new(0, 0, -10), Vector3.UnitZ);
+        InputHandler.Mouse.Cursor.CursorMode = CursorMode.Raw;
 
-        GraphicsHandler = new(this, _gl);
-        GraphicsHandler.SetViewport(new(800, 600));
+        Camera = new FreeViewCamera(this, new(0, 0, -10), Vector3.UnitZ, 10f);
 
-        string vertexCode = File.ReadAllText("Shaders\\plain_vert.shader");
-        string fragmentCode = File.ReadAllText("Shaders\\plain_frag.shader");
+        GraphicsHandler = new(this);
+        GraphicsHandler.SetViewport(new(1080, 750));
 
-        vertShader = new(_gl, vertexCode, ShaderType.VertexShader);
-        fragShader = new(_gl, fragmentCode, ShaderType.FragmentShader);
+        vertShader = new(GL, "Shaders\\plain_vert.shader", ShaderType.VertexShader);
+        fragShader = new(GL, "Shaders\\plain_frag.shader", ShaderType.FragmentShader);
 
-        shaderProgram = new(_gl);
+        shaderProgram = new(GL);
         shaderProgram.AttachShader(vertShader);
         shaderProgram.AttachShader(fragShader);
         shaderProgram.Link();
-
+        
         shaderProgram.DetachShader(vertShader);
         shaderProgram.DetachShader(fragShader);
         vertShader.Dispose();
         fragShader.Dispose();
-
+        
         _rectangle = new(shaderProgram, this, Vector3.Zero);
         _triangle = new(shaderProgram, this, new(1, 0, 0));
     }
@@ -78,6 +79,11 @@ public class GameEngine
         Camera.Update(delta);
         _rectangle.Update(delta);
         _triangle.Update(delta);
+
+        if (InputHandler.Keyboard.IsKeyPressed(Key.Escape))
+        {
+            MainWindow.Close();
+        }
     }
 
     private void OnRender(double delta)

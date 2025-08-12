@@ -19,4 +19,7 @@ public static class MathHelper
 
     public static double ToDegrees(this double radians) => radians * 180.0d / Math.PI;
     public static double ToRadians(this double degrees) => degrees * Math.PI / 180.0d;
+
+    public static float ToDegrees(this float radians) => radians * 180.0f / (float)Math.PI;
+    public static float ToRadians(this float degrees) => degrees * (float)Math.PI / 180.0f;
 }

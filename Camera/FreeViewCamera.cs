@@ -8,71 +8,93 @@ namespace ProjectNewWorld.Core.Cameras;
 
 public class FreeViewCamera : BaseCamera
 {
+    public readonly float Sensitivity;
+
     private readonly InputHandler _input;
 
     private float _yaw = 0f; // Right-Left
     private float _pitch = 0f; // Up-Down
+    private float _latestDelta = 0f;
 
-    public FreeViewCamera(GameEngine engine, Vector3 initialPosition, Vector3 initialTarget) : base(engine, initialPosition, initialTarget)
+    private Vector3 _initialForward;
+    private Vector3 _forward;
+    private Vector2 _previousMousePosition = Vector2.Zero;
+
+    public FreeViewCamera(GameEngine engine, Vector3 initialPosition, Vector3 forward, float sensitivity) : base(engine, initialPosition, initialPosition + forward)
     {
         this.FieldOfView = (float)MathHelper.ToRadians(75);
+        this.Sensitivity = sensitivity;
 
         _input = _engine.InputHandler;
         _input.Mouse.MouseMove += OnMouseMove;
+
+        _forward = forward;
+        _initialForward = _forward;
     }
 
     public override void Update(double delta)
     {
-        Vector3 directionVector = Vector3.Zero;
+        _latestDelta = (float)delta;
+        _previousMousePosition = _input.Mouse.Position;
+        float trueVelocity = this.Velocity * (float)delta;
+
         if (_input.Keyboard.IsKeyPressed(Key.W))
         {
-            directionVector.Z = 1;
+            this.Position += this._forward * trueVelocity;
         }
         else if (_input.Keyboard.IsKeyPressed(Key.S))
         {
-            directionVector.Z = -1;
+            this.Position -= this._forward * trueVelocity;
         }
 
+        Vector3 xAxis = Vector3.Cross(_forward, Vector3.UnitY);
         if (_input.Keyboard.IsKeyPressed(Key.A))
         {
-            directionVector.X = 1;
+            this.Position -= xAxis * trueVelocity;
         }
         else if (_input.Keyboard.IsKeyPressed(Key.D))
         {
-            directionVector.X = -1;
+            this.Position += xAxis * trueVelocity;
         }
 
-        if (_input.Keyboard.IsKeyPressed(Key.Q))
+        if (_input.Keyboard.IsKeyPressed(Key.Space))
         {
-            directionVector.Y = 1;
+            this.Position += Vector3.UnitY * trueVelocity;
         }
-        else if (_input.Keyboard.IsKeyPressed(Key.E))
+        else if (_input.Keyboard.IsKeyPressed(Key.AltLeft))
         {
-            directionVector.Y = -1;
+            this.Position -= Vector3.UnitY * trueVelocity;
         }
 
         if (_input.Keyboard.IsKeyPressed(Key.R))
         {
-            this.Position = this._initialPosition;
-            this.Target = this._initialTarget;
-            directionVector = Vector3.Zero;
+            this.Reset();
         }
 
-        if (directionVector != Vector3.Zero)
-            Vector3.Normalize(directionVector);
-
-        this.Position += directionVector * (float)delta * this.Velocity;
-        //this.Target = _yaw + _pitch;
+        this.Target = this.Position + _forward; 
         base.Update(delta);
     }
 
-    private void OnMouseMove(IMouse mouse, Vector2 oldPosition)
+    public override void Reset()
     {
-        float deltaX = mouse.Position.X - oldPosition.X;
-        float deltaY = mouse.Position.Y - oldPosition.Y;
-        _yaw += deltaX;
-        _pitch += deltaY;
-        if (deltaX > 0 && deltaY > 0)
-            Debug.WriteLine($"Yaw: {_yaw}", $"Pitch: {_pitch}");
+        base.Reset();
+        _forward = _initialForward;
+        _yaw = 0f;
+        _pitch = 0f;
+    }
+
+    private void OnMouseMove(IMouse mouse, Vector2 position)
+    {
+        Vector2 deltaPos = position - _previousMousePosition;
+        _yaw += deltaPos.X * this.Sensitivity * _latestDelta;
+        _pitch += deltaPos.Y * this.Sensitivity * _latestDelta;
+        _pitch = Math.Clamp(_pitch, -89f, 89f);
+
+        float _yawRad = _yaw.ToRadians();
+        float _pitchRad = _pitch.ToRadians();
+        _forward.X = (float)(Math.Cos(_pitchRad) * Math.Sin(_yawRad));
+        _forward.Y = (float)Math.Sin(_pitchRad);
+        _forward.Z = (float)(-Math.Cos(_pitchRad) * Math.Cos(_yawRad));
+        _forward = -Vector3.Normalize(_forward);
     }
 }

@@ -1,7 +1,5 @@
-﻿using ProjectNewWorld.Core.Cameras;
-using ProjectNewWorld.Core.GLObjects;
+﻿using ProjectNewWorld.Core.GLObjects;
 using Silk.NET.OpenGL;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace ProjectNewWorld.Core.Objects;
@@ -30,8 +28,7 @@ public abstract class RenderableObject : DisposableObject, ITransformableObject
             _rotationYMatrix = Matrix4x4.CreateRotationY(value.Y);
             _rotationZMatrix = Matrix4x4.CreateRotationZ(value.Z);
 
-            Matrix4x4 rotationMatrix = _rotationXMatrix * _rotationYMatrix * _rotationZMatrix;
-            _model = _scaleMatrix * rotationMatrix;
+            _model = _scaleMatrix * this.RotationMatrix;
             _model.Translation = _position;
         }
     }
@@ -45,8 +42,8 @@ public abstract class RenderableObject : DisposableObject, ITransformableObject
             _scale = value;
 
             _scaleMatrix = Matrix4x4.CreateScale(value);
-            Matrix4x4 _rotationMatrix = _rotationXMatrix * _rotationYMatrix * _rotationZMatrix;
-            _model = _scaleMatrix * _rotationMatrix;
+
+            _model = _scaleMatrix * this.RotationMatrix;
             _model.Translation = _position;
         }
     }
@@ -56,6 +53,7 @@ public abstract class RenderableObject : DisposableObject, ITransformableObject
     public readonly VertexArrayObject VAO;
     public readonly BufferObject VBO;
 
+    private Matrix4x4 RotationMatrix => _rotationXMatrix * _rotationYMatrix * _rotationZMatrix;
     private Matrix4x4 _rotationXMatrix = Matrix4x4.Identity;
     private Matrix4x4 _rotationYMatrix = Matrix4x4.Identity;
     private Matrix4x4 _rotationZMatrix = Matrix4x4.Identity; 
@@ -71,7 +69,7 @@ public abstract class RenderableObject : DisposableObject, ITransformableObject
     public RenderableObject(ShaderProgram shaderProgram, GameEngine engine, Vector3 position)
     {
         this.Engine = engine;
-        this.gl = engine.GraphicsHandler.GL;
+        this.gl = engine.GL;
 
         this.VAO = new(gl);
         this.VBO = new(gl, BufferTargetARB.ArrayBuffer);
