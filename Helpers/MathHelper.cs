@@ -1,10 +1,11 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 
 namespace ProjectNewWorld.Core.Helpers;
 
 public static class MathHelper
 {
-    public static float[] FormatAsArray(this Matrix4x4 matrix)
+    public static float[] ToArray(this Matrix4x4 matrix)
     {
         float[] array =
         {
@@ -15,6 +16,21 @@ public static class MathHelper
         };
 
         return array;
+    }
+
+    public static Vector2 ToVector2(this Size size)
+    {
+        Vector2 vector = new(size.Width, size.Height);
+        return vector;
+    }
+    public static Vector4 ToVector4(this Color color)
+    {
+        Vector4 vector = new(color.R / 255f, color.G / 255f, color.B / 255f, 1f);
+        return vector;
+    }
+    public static Color Invert(this Color color)
+    {
+        return Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B);
     }
 
     public static double ToDegrees(this double radians) => radians * 180.0d / Math.PI;

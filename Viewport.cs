@@ -1,15 +1,19 @@
-﻿namespace ProjectNewWorld.Core;
+﻿using System.Drawing;
+
+namespace ProjectNewWorld.Core;
 
 public readonly struct Viewport
 {
-    public readonly int Width;
-    public readonly int Height;
+    public readonly Size Size;
 
     public Viewport(int width, int height)
     {
-        Width = width;
-        Height = height;
+        Size = new(width, height);
+    }
+    public Viewport(Size size)
+    {
+        Size = size;
     }
 
-    public float GetAspectRatio() => (float)Width / (float)Height;
+    public float GetAspectRatio() => (float)Size.Width / (float)Size.Height;
 }

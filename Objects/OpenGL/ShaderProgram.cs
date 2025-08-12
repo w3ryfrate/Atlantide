@@ -2,7 +2,7 @@
 using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.GLObjects;
+namespace ProjectNewWorld.Core.Objects.OpenGL;
 
 public class ShaderProgram : DisposableObject
 {
@@ -81,6 +81,26 @@ public class ShaderProgram : DisposableObject
         _gl.Uniform1(loc, value);
     }
 
+    public void SetUniform2(string name, Vector2 value)
+    {
+        ThrowIfDisposed<ShaderProgram>();
+        int loc = _gl.GetUniformLocation(Handle, name);
+        if (loc == -1)
+            throw new ArgumentException("Error::Uniform not found!::" + name);
+
+        _gl.Uniform2(loc, value);
+    }
+
+    public void SetUniform4(string name, Vector4 value)
+    {
+        ThrowIfDisposed<ShaderProgram>();
+        int loc = _gl.GetUniformLocation(Handle, name);
+        if (loc == -1)
+            throw new ArgumentException("Error::Uniform not found!::" + name);
+
+        _gl.Uniform4(loc, value);
+    }
+
     public void SetUniformMat4(string name, Matrix4x4 value)
     {
         ThrowIfDisposed<ShaderProgram>();
@@ -88,15 +108,12 @@ public class ShaderProgram : DisposableObject
         if (loc == -1)
             throw new ArgumentException("Error::Uniform not found!::" + name);
 
-        _gl.UniformMatrix4(loc, true, value.FormatAsArray());
+        _gl.UniformMatrix4(loc, true, value.ToArray());
     }
 
     public void Delete()
     {
         _gl.DeleteProgram(Handle);
-        Handle = 0;
-        _shaders.vertex = false;
-        _shaders.frag = false;
     }
 
     ~ShaderProgram()
@@ -109,10 +126,7 @@ public class ShaderProgram : DisposableObject
         if (Disposed)
             return;
 
-        if (disposing)
-        {
-        }
-
+        Handle = 0;
         Delete();
         Disposed = true;
     }

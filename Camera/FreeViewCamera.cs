@@ -92,9 +92,9 @@ public class FreeViewCamera : BaseCamera
 
         float _yawRad = _yaw.ToRadians();
         float _pitchRad = _pitch.ToRadians();
-        _forward.X = (float)(Math.Cos(_pitchRad) * Math.Sin(_yawRad));
+        _forward.X = (float)(-Math.Cos(_pitchRad) * Math.Sin(_yawRad));
         _forward.Y = (float)Math.Sin(_pitchRad);
-        _forward.Z = (float)(-Math.Cos(_pitchRad) * Math.Cos(_yawRad));
+        _forward.Z = (float)(Math.Cos(_pitchRad) * Math.Cos(_yawRad));
         _forward = -Vector3.Normalize(_forward);
     }
 }

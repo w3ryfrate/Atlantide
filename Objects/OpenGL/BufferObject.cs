@@ -1,6 +1,7 @@
-﻿using Silk.NET.OpenGL;
+﻿using ProjectNewWorld.Core.Objects;
+using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.GLObjects;
+namespace ProjectNewWorld.Core.Objects.OpenGL;
 
 public class BufferObject : DisposableObject
 {
@@ -27,7 +28,7 @@ public class BufferObject : DisposableObject
         _gl.BindBuffer(_target, 0);
     }
 
-    public unsafe void SetData(nuint size, void* data, BufferUsageARB usage)
+    public unsafe void BufferData(nuint size, void* data, BufferUsageARB usage)
     {
         ThrowIfDisposed<BufferObject>(_target);
         _gl.BufferData(_target, size, data, usage);

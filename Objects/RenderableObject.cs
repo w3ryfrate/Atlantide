@@ -1,113 +1,59 @@
-﻿using ProjectNewWorld.Core.GLObjects;
+﻿using ProjectNewWorld.Core.Objects.OpenGL;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
 namespace ProjectNewWorld.Core.Objects;
 
-public abstract class RenderableObject : DisposableObject, ITransformableObject
+public abstract class RenderableObject : DisposableObject
 {
-    public Vector3 Position
-    {
-        get => _position;
-        set
-        {
-            _position = value;
-            _model.Translation = value;
-        }
-    }
-    private Vector3 _position;
+    public Transform Transform;
 
-    public Vector3 Rotation
-    {
-        get => _rotation;
-        set
-        {
-            _rotation = value;
-
-            _rotationXMatrix = Matrix4x4.CreateRotationX(value.X);
-            _rotationYMatrix = Matrix4x4.CreateRotationY(value.Y);
-            _rotationZMatrix = Matrix4x4.CreateRotationZ(value.Z);
-
-            _model = _scaleMatrix * this.RotationMatrix;
-            _model.Translation = _position;
-        }
-    }
-    private Vector3 _rotation;
-
-    public float Scale
-    {
-        get => _scale;
-        set
-        {
-            _scale = value;
-
-            _scaleMatrix = Matrix4x4.CreateScale(value);
-
-            _model = _scaleMatrix * this.RotationMatrix;
-            _model.Translation = _position;
-        }
-    }
-    private float _scale;
-
-    public readonly ShaderProgram ShaderProgram;
     public readonly VertexArrayObject VAO;
     public readonly BufferObject VBO;
 
-    private Matrix4x4 RotationMatrix => _rotationXMatrix * _rotationYMatrix * _rotationZMatrix;
-    private Matrix4x4 _rotationXMatrix = Matrix4x4.Identity;
-    private Matrix4x4 _rotationYMatrix = Matrix4x4.Identity;
-    private Matrix4x4 _rotationZMatrix = Matrix4x4.Identity; 
-    private Matrix4x4 _scaleMatrix = Matrix4x4.Identity;
+    /// <summary>
+    /// Fires just before this object is drawn.
+    /// </summary>
+    public readonly EventHandler<EventArgs> BeforeDraw;
 
     protected readonly GL gl;
     protected readonly GameEngine Engine;
-    protected abstract float[] Vertices { get; }
+    protected abstract float[] VertexBufferData { get; }
 
-    protected Matrix4x4 Model => _model;
-    private Matrix4x4 _model = Matrix4x4.Identity;
+    public Matrix4x4 Model => this.Transform.GetModel();
 
-    public RenderableObject(ShaderProgram shaderProgram, GameEngine engine, Vector3 position)
+    public RenderableObject(GameEngine engine, Transform transform)
     {
         this.Engine = engine;
         this.gl = engine.GL;
 
         this.VAO = new(gl);
         this.VBO = new(gl, BufferTargetARB.ArrayBuffer);
-        this.ShaderProgram = shaderProgram;
 
-        this.Position = position;
-        this.Rotation = Vector3.Zero;
-        this.Scale = 1f;
+        this.Transform = transform;
+
+        this.BeforeDraw += OnBeforeDraw;
     }
 
-    float time = 0f;
     public virtual void Update(double deltaTime)
     {
         ThrowIfDisposed<RenderableObject>();
-        time += (float)deltaTime;
-        ShaderProgram.SetUniform1("uTime", time);
     }
 
-    public virtual void Draw()
+    protected virtual void OnBeforeDraw(object? sender, EventArgs e)
     {
         ThrowIfDisposed<RenderableObject>();
-        ShaderProgram.SetUniformMat4("uProjection", Engine.GraphicsHandler.Projection);
-        ShaderProgram.SetUniformMat4("uView", Engine.Camera.View);
-        ShaderProgram.SetUniformMat4("uModel", _model);
-        ShaderProgram.Use();
-        VAO.Bind();
+    }
+
+    ~RenderableObject()
+    {
+        Dispose(false);
     }
 
     protected override void Dispose(bool disposing)
     {
         if (Disposed)
             return;
-
-        if (disposing)
-        {
-            Array.Clear(Vertices);
-            _model = Matrix4x4.Identity;
-        }
 
         VAO.Dispose();
         VBO.Dispose();

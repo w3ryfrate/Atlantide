@@ -1,5 +1,6 @@
 ﻿using ProjectNewWorld.Core.Helpers;
 using ProjectNewWorld.Core.Objects;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace ProjectNewWorld.Core.Cameras;

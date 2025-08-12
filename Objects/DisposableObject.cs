@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.GLObjects;
+namespace ProjectNewWorld.Core.Objects;
 
 public abstract class DisposableObject : IDisposable
 {

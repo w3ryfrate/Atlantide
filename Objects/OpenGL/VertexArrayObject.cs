@@ -1,6 +1,7 @@
-﻿using Silk.NET.OpenGL;
+﻿using ProjectNewWorld.Core.Objects;
+using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.GLObjects;
+namespace ProjectNewWorld.Core.Objects.OpenGL;
 
 public class VertexArrayObject : DisposableObject
 {
@@ -41,11 +42,6 @@ public class VertexArrayObject : DisposableObject
     {
         if (Disposed)
             return;
-
-        if (disposing)
-        {
-
-        }
 
         Delete();
         Disposed = true;

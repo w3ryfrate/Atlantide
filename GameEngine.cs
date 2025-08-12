@@ -3,11 +3,14 @@
 using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using System.Numerics;
-using ProjectNewWorld.Core.GLObjects;
-using Shader = ProjectNewWorld.Core.GLObjects.Shader;
+using System.Drawing;
+using Shader = ProjectNewWorld.Core.Objects.OpenGL.Shader;
 using Silk.NET.Input;
 using ProjectNewWorld.Core.Cameras;
 using ProjectNewWorld.Core.Input;
+using ProjectNewWorld.Core.Objects;
+using ProjectNewWorld.Core.Helpers;
+using ProjectNewWorld.Core.Objects.OpenGL;
 
 namespace ProjectNewWorld.Core;
 
@@ -22,8 +25,7 @@ public class GameEngine
 
     private IInputContext _input;
 
-    private Objects.Rectangle _rectangle;
-    private Objects.Triangle _triangle;
+    private RenderableObject[] _renderableObjects = new RenderableObject[3];
 
     ShaderProgram shaderProgram;
     Shader vertShader;
@@ -52,13 +54,13 @@ public class GameEngine
         InputHandler = new(_input);
         InputHandler.Mouse.Cursor.CursorMode = CursorMode.Raw;
 
-        Camera = new FreeViewCamera(this, new(0, 0, -10), Vector3.UnitZ, 10f);
+        Camera = new FreeViewCamera(this, new(0, 0, 5), -Vector3.UnitZ, 10f);
 
         GraphicsHandler = new(this);
         GraphicsHandler.SetViewport(new(1080, 750));
 
-        vertShader = new(GL, "Shaders\\plain_vert.shader", ShaderType.VertexShader);
-        fragShader = new(GL, "Shaders\\plain_frag.shader", ShaderType.FragmentShader);
+        vertShader = new(GL, "Assets\\Shaders\\plain_vert.shader", ShaderType.VertexShader);
+        fragShader = new(GL, "Assets\\Shaders\\gradient_frag.shader", ShaderType.FragmentShader);
 
         shaderProgram = new(GL);
         shaderProgram.AttachShader(vertShader);
@@ -70,28 +72,44 @@ public class GameEngine
         vertShader.Dispose();
         fragShader.Dispose();
         
-        _rectangle = new(shaderProgram, this, Vector3.Zero);
-        _triangle = new(shaderProgram, this, new(1, 0, 0));
+        for (int i = 0; i < _renderableObjects.Length; i++)
+        {
+            if (i == 0)
+            {
+                Objects.Triangle triangle = new(this, new(Vector3.Zero));
+                _renderableObjects[i] = triangle;
+            }
+            else
+            {
+                Objects.Rectangle rect = new( this, new(Vector3.UnitX * i));
+                _renderableObjects[i] = rect;
+            }
+        }
+
+        _renderableObjects[2].Transform.Rotation = new(0f, MathHelper.ToRadians(180f), 0f);
     }
 
     private void OnUpdate(double delta)
     {
-        Camera.Update(delta);
-        _rectangle.Update(delta);
-        _triangle.Update(delta);
-
         if (InputHandler.Keyboard.IsKeyPressed(Key.Escape))
         {
             MainWindow.Close();
         }
+
+        Camera.Update(delta);
     }
 
     private void OnRender(double delta)
     {
-        GraphicsHandler.Clear(System.Drawing.Color.CornflowerBlue);
+        GraphicsHandler.Clear(Color.CornflowerBlue);
 
-        _rectangle.Draw();
-        _triangle.Draw();
+        foreach (var obj in _renderableObjects)
+        {
+            if (obj is Objects.Rectangle)
+                GraphicsHandler.DrawRectangle(obj as Objects.Rectangle, shaderProgram, Color.Firebrick);
+            else
+                GraphicsHandler.DrawTriangle(obj as Triangle, shaderProgram, Color.Sienna);
+        }
 
         MainWindow.SwapBuffers();
     }

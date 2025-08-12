@@ -1,20 +1,18 @@
-﻿using ProjectNewWorld.Core.GLObjects;
-using Silk.NET.OpenGL;
-using System.Numerics;
+﻿using Silk.NET.OpenGL;
 
 namespace ProjectNewWorld.Core.Objects;
 
 public class Triangle : RenderableObject
 {
-    protected override float[] Vertices => _vertices;
+    protected override float[] VertexBufferData => _vertices;
     private readonly float[] _vertices =
     {
-       -0.5f,-0.5f, 0.0f,
-        0.5f,-0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+       -0.5f,-0.5f, 0.0f,   0.0f, 0.0f,
+        0.5f,-0.5f, 0.0f,   1.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,   0.5f, 1.0f,
     };
 
-    public Triangle(ShaderProgram program, GameEngine engine, Vector3 position) : base(program, engine, position)
+    public Triangle(GameEngine engine, Transform transform) : base(engine, transform)
     {
         VAO.Bind();
 
@@ -22,11 +20,14 @@ public class Triangle : RenderableObject
         unsafe
         {
             fixed (float* ptr = _vertices)
-                VBO.SetData((nuint)(_vertices.Length * sizeof(float)), ptr, BufferUsageARB.StaticDraw);
+                VBO.BufferData((nuint)(_vertices.Length * sizeof(float)), ptr, BufferUsageARB.StaticDraw);
         }
 
         gl.EnableVertexAttribArray(0);
-        gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+        gl.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
         VAO.Unbind();
         VBO.Unbind();
@@ -37,10 +38,9 @@ public class Triangle : RenderableObject
         base.Update(deltaTime);
     }
 
-    public override void Draw()
+    protected override void OnBeforeDraw(object? sender, EventArgs e)
     {
-        base.Draw();
-        gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        base.OnBeforeDraw(sender, e);
     }
 
     protected override void Dispose(bool disposing)

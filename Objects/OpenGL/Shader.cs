@@ -1,6 +1,7 @@
-﻿using Silk.NET.OpenGL;
+﻿using ProjectNewWorld.Core.Objects;
+using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.GLObjects;
+namespace ProjectNewWorld.Core.Objects.OpenGL;
 
 public class Shader : DisposableObject
 {
@@ -15,7 +16,7 @@ public class Shader : DisposableObject
         Handle = _gl.CreateShader(type);
         Type = type;
         _gl.ShaderSource(Handle, File.ReadAllText(file));
-        this.Compile();
+        Compile();
     }
 
     private void Compile()

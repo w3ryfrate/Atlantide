@@ -1,4 +1,4 @@
-﻿using ProjectNewWorld.Core.GLObjects;
+﻿using ProjectNewWorld.Core.Objects.OpenGL;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
@@ -8,31 +8,31 @@ public class Rectangle : RenderableObject
 {
     private BufferObject _ebo;
 
-    protected override float[] Vertices => _vertices;
-    private float[] _vertices =
+    protected override float[] VertexBufferData => _vertices;
+    private readonly float[] _vertices =
     {
-        //aPosition     
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,   
+        //aPosition            //aTextureUV
+        -0.5f,-0.5f, 0.0f,    0.0f, 0.0f,
+         0.5f,-0.5f, 0.0f,    1.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,    0.0f, 1.0f,
+         0.5f, 0.5f, 0.0f,    1.0f, 1.0f,
     };
 
     private readonly uint[] indices =
     {
         0u, 1u, 3u,
-        1u, 2u, 3u
+        0u, 3u, 2u
     };
 
-    public Rectangle(ShaderProgram program, GameEngine engine, Vector3 position) : base(program, engine, position)
+    public Rectangle(GameEngine engine, Transform transform) : base(engine, transform)
     {
         VAO.Bind();
 
         VBO.Bind();
         unsafe
         {
-            fixed (float* ptr = Vertices)
-                VBO.SetData((nuint)(Vertices.Length * sizeof(float)), ptr, BufferUsageARB.StaticDraw);
+            fixed (float* ptr = VertexBufferData)
+                VBO.BufferData((nuint)(VertexBufferData.Length * sizeof(float)), ptr, BufferUsageARB.StaticDraw);
         }
 
         _ebo = new(gl, BufferTargetARB.ElementArrayBuffer);
@@ -40,11 +40,14 @@ public class Rectangle : RenderableObject
         unsafe
         {
             fixed (uint* ptr = indices)
-                _ebo.SetData((nuint)(indices.Length * sizeof(uint)), ptr, BufferUsageARB.StaticDraw);
+                _ebo.BufferData((nuint)(indices.Length * sizeof(uint)), ptr, BufferUsageARB.StaticDraw);
         }
 
         gl.EnableVertexAttribArray(0);
-        gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+        gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+        gl.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 
         VAO.Unbind();
         VBO.Unbind();
@@ -56,13 +59,9 @@ public class Rectangle : RenderableObject
         base.Update(deltaTime);
     }
 
-    public override void Draw()
+    protected override void OnBeforeDraw(object? sender, EventArgs e)
     {
-        base.Draw();
-        unsafe
-        {
-            gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
-        }
+        base.OnBeforeDraw(sender, e);
     }
 
     protected override void Dispose(bool disposing)
