@@ -17,9 +17,9 @@ public abstract class BaseCamera
 
     protected readonly Vector3 _initialPosition;
     protected readonly Vector3 _initialTarget;
-    protected readonly GameEngine _engine;
+    protected readonly Game _engine;
 
-    public BaseCamera(GameEngine engine, Vector3 initialPosition, Vector3 initialTarget)
+    public BaseCamera(Game engine, Vector3 initialPosition, Vector3 initialTarget)
     {
         _initialPosition = initialPosition;
         _initialTarget = initialTarget;

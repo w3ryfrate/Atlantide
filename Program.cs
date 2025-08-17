@@ -6,6 +6,6 @@ class Program
 {
     private static void Main(string[] args)
     {
-        new GameEngine();
+        new Game();
     }
 }

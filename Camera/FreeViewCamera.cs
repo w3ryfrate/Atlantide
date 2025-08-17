@@ -20,7 +20,7 @@ public class FreeViewCamera : BaseCamera
     private Vector3 _forward;
     private Vector2 _previousMousePosition = Vector2.Zero;
 
-    public FreeViewCamera(GameEngine engine, Vector3 initialPosition, Vector3 forward, float sensitivity) : base(engine, initialPosition, initialPosition + forward)
+    public FreeViewCamera(Game engine, Vector3 initialPosition, Vector3 forward, float sensitivity) : base(engine, initialPosition, initialPosition + forward)
     {
         this.FieldOfView = (float)MathHelper.ToRadians(75);
         this.Sensitivity = sensitivity;

@@ -12,7 +12,7 @@ public class Triangle : RenderableObject
         0.0f, 0.5f, 0.0f,   0.5f, 1.0f,
     };
 
-    public Triangle(GameEngine engine, Transform transform) : base(engine, transform)
+    public Triangle(Game engine, Transform transform) : base(engine, transform)
     {
         VAO.Bind();
 

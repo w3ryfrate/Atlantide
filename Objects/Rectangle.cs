@@ -24,7 +24,7 @@ public class Rectangle : RenderableObject
         0u, 3u, 2u
     };
 
-    public Rectangle(GameEngine engine, Transform transform) : base(engine, transform)
+    public Rectangle(Game engine, Transform transform) : base(engine, transform)
     {
         VAO.Bind();
 

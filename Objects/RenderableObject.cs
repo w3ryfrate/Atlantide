@@ -6,7 +6,7 @@ namespace ProjectNewWorld.Core.Objects;
 
 public abstract class RenderableObject : DisposableObject
 {
-    public Transform Transform;
+    public readonly Transform Transform;
 
     public readonly VertexArrayObject VAO;
     public readonly BufferObject VBO;
@@ -17,12 +17,12 @@ public abstract class RenderableObject : DisposableObject
     public readonly EventHandler<EventArgs> BeforeDraw;
 
     protected readonly GL gl;
-    protected readonly GameEngine Engine;
+    protected readonly Game Engine;
     protected abstract float[] VertexBufferData { get; }
 
     public Matrix4x4 Model => this.Transform.GetModel();
 
-    public RenderableObject(GameEngine engine, Transform transform)
+    public RenderableObject(Game engine, Transform transform)
     {
         this.Engine = engine;
         this.gl = engine.GL;
