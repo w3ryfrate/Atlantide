@@ -13,6 +13,7 @@ public class GraphicsHandler
     public Matrix4x4 Projection { get; private set; }
     public Viewport Viewport { get; private set; }
 
+    private List<RenderableObject> _toUpdate = new();
     private readonly Game _game;
     private readonly GL _gl;
 
@@ -36,14 +37,15 @@ public class GraphicsHandler
         _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
     }
 
-    private void PrepareDrawing(RenderableObject obj, ShaderProgram shaderProgram)
+    public void Update(double delta)
     {
-        obj.BeforeDraw.Invoke(obj, new());
-        shaderProgram.SetUniformMat4("uMVP", obj.Model * _game.Camera.View * Projection);
-        shaderProgram.SetUniform4("uColor1", Color.Red.ToVector4());
-        shaderProgram.SetUniform4("uColor2", Color.Blue.ToVector4());
-        shaderProgram.Use();
-        obj.VAO.Bind();
+        foreach (var obj in _toUpdate)
+        {
+            if (!obj.Disposed)
+                obj.Update(delta);
+        }
+
+        _toUpdate.Clear();
     }
 
     public void DrawRectangle(Objects.Rectangle rect, ShaderProgram shaderProgram)
@@ -51,6 +53,7 @@ public class GraphicsHandler
         if (rect.Disposed)
             return;
 
+        _toUpdate.Add(rect);
         PrepareDrawing(rect, shaderProgram);
         unsafe
         {
@@ -63,7 +66,17 @@ public class GraphicsHandler
         if (triangle.Disposed)
             return;
 
+        _toUpdate.Add(triangle);
         PrepareDrawing(triangle, shaderProgram);
         _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+    }
+
+    private void PrepareDrawing(RenderableObject obj, ShaderProgram shaderProgram)
+    {
+        shaderProgram.SetUniformMat4("uMVP", obj.Model * _game.Camera.View * Projection);
+        shaderProgram.SetUniform4("uColor1", Color.Red.ToVector4());
+        shaderProgram.SetUniform4("uColor2", Color.Blue.ToVector4());
+        shaderProgram.Use();
+        obj.VAO.Bind();
     }
 }
