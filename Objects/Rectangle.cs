@@ -1,6 +1,5 @@
 ﻿using ProjectNewWorld.Core.Objects.OpenGL;
 using Silk.NET.OpenGL;
-using System.Numerics;
 
 namespace ProjectNewWorld.Core.Objects;
 
@@ -54,14 +53,10 @@ public class Rectangle : RenderableObject
         _ebo.Unbind();
     }
 
-    public override void Update(double deltaTime)
+    public override void Update(double delta)
     {
-        base.Update(deltaTime);
-    }
-
-    protected override void OnBeforeDraw(object? sender, EventArgs e)
-    {
-        base.OnBeforeDraw(sender, e);
+        base.Update(delta);
+        Game.ConsoleLogger.LogInformation("I am a rectangle!");
     }
 
     protected override void Dispose(bool disposing)

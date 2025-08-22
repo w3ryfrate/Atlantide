@@ -4,7 +4,7 @@ using Silk.NET.Input;
 
 namespace ProjectNewWorld.Core.Input;
 
-public class InputHandler
+public class InputHandler : IDisposable
 {
     private readonly IInputContext _input;
     public readonly IMouse Mouse;
@@ -15,5 +15,11 @@ public class InputHandler
         _input = inputContext;
         Keyboard = _input.Keyboards[0];
         Mouse = _input.Mice[0];
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _input.Dispose();
     }
 }

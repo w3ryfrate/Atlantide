@@ -38,11 +38,6 @@ public class Triangle : RenderableObject
         base.Update(deltaTime);
     }
 
-    protected override void OnBeforeDraw(object? sender, EventArgs e)
-    {
-        base.OnBeforeDraw(sender, e);
-    }
-
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

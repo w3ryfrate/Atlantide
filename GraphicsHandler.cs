@@ -7,64 +7,106 @@ using System.Numerics;
 
 namespace ProjectNewWorld.Core;
 
-public class GraphicsHandler
+public enum ShaderProgramType
+{
+    PLAIN_PLAIN,
+    PLAIN_GRADIENT,
+}
+
+public class GraphicsRenderer
 {
     public Matrix4x4 Projection { get; private set; }
     public Viewport Viewport { get; private set; }
 
-    private readonly GameEngine _engine;
-    private readonly GL _gl;
+    private List<RenderableObject> _toUpdate = new();
 
-    public GraphicsHandler(GameEngine engine)
+    private readonly Game _game;
+    private readonly GL _gl;
+    private readonly Dictionary<ShaderProgramType, ShaderProgram> _shaderPrograms;
+    private const string SHADERS_DIRECTORY = "Assets\\Shaders\\";
+
+    public GraphicsRenderer(Game game)
     {
-        _engine = engine;
-        _gl = _engine.GL;
+        _game = game;
+        _gl = _game.GL;
+        _gl.Enable(EnableCap.DepthTest);
+
+        //Objects.OpenGL.Shader plainVertShader = new(_gl, SHADERS_DIRECTORY + "plain_vert.shader", ShaderType.VertexShader);
+
+        //Objects.OpenGL.Shader plainFragShader = new(_gl, SHADERS_DIRECTORY + "plain_frag.shader", ShaderType.FragmentShader);
+        //Objects.OpenGL.Shader gradientShader = new(_gl, SHADERS_DIRECTORY + "gradient_frag.shader", ShaderType.FragmentShader);
+
+        //_shaderPrograms = new()
+        //{
+        //    { ShaderProgramType.PLAIN_PLAIN, new(game, plainVertShader, plainFragShader) },
+        //    { ShaderProgramType.PLAIN_GRADIENT, new(game, plainVertShader, gradientShader) }
+        //};
     }
 
     public void SetViewport(Viewport viewport)
     {
         Viewport = viewport;
-        _engine.MainWindow.Size = new(this.Viewport.Size.Width, this.Viewport.Size.Height);
-        Projection = Matrix4x4.CreatePerspectiveFieldOfView(_engine.Camera.FieldOfView, Viewport.GetAspectRatio(), 0.1f, 100f);
+        _game.MainWindow.Size = new(this.Viewport.Size.Width, this.Viewport.Size.Height);
+        Projection = Matrix4x4.CreatePerspectiveFieldOfView(_game.Camera.FieldOfView, Viewport.GetAspectRatio(), 0.1f, 100f);
         _gl.Viewport(0, 0, (uint)Viewport.Size.Width, (uint)Viewport.Size.Height);
     }
 
-    public void Clear(System.Drawing.Color color)
+    public void Clear(Color color)
     {
         _gl.ClearColor(color);
         _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
     }
 
-    private void PrepareDrawing(RenderableObject obj, ShaderProgram shaderProgram, Color color)
+    public void Update(double delta)
     {
-        obj.BeforeDraw.Invoke(obj, new());
-        //obj.ShaderProgram.SetUniform2("uViewportSize", this.Viewport.Size.ToVector2());
-        shaderProgram.SetUniform4("uColor1", color.ToVector4());
-        shaderProgram.SetUniform4("uColor2", color.Invert().ToVector4());
-        shaderProgram.SetUniformMat4("uMVP", obj.Model * this._engine.Camera.View * this.Projection);
-        shaderProgram.Use();
-        obj.VAO.Bind();
+        foreach (var obj in _toUpdate)
+        {
+            if (!obj.Disposed)
+                obj.Update(delta);
+        }
+
+        _toUpdate.Clear();
     }
 
-    // TODO: Add ShaderProgram as an argument here and remove it from RenderableObject
-    public void DrawRectangle(Objects.Rectangle rect, ShaderProgram shaderProgram, Color color)
+    public void DrawVoxel(Voxel voxel, ShaderProgram shaderProgram)
+    {
+        if (voxel.Disposed)
+            return;
+
+        _toUpdate.Add(voxel);
+        UseProgram(voxel, shaderProgram);
+        _gl.DrawArrays(PrimitiveType.Triangles, 0, 36);
+    }
+
+    public void DrawRectangle(Objects.Rectangle rect, ShaderProgram shaderProgram)
     {
         if (rect.Disposed)
             return;
 
-        PrepareDrawing(rect, shaderProgram, color);
+        _toUpdate.Add(rect);
+        UseProgram(rect, shaderProgram);
         unsafe
         {
             _gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
         }
     }
 
-    public void DrawTriangle(Triangle triangle, ShaderProgram shaderProgram, Color color)
+    public void DrawTriangle(Triangle triangle, ShaderProgram shaderProgram)
     {
         if (triangle.Disposed)
             return;
 
-        PrepareDrawing(triangle, shaderProgram, color);
+        _toUpdate.Add(triangle);
+        UseProgram(triangle, shaderProgram);
         _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+    }
+
+    private void UseProgram(RenderableObject obj, ShaderProgram shaderProgram)
+    {
+        shaderProgram.SetUniformMat4("uMVP", obj.Model * _game.Camera.View * Projection);
+        shaderProgram.SetUniform4("uColor1", Color.Red.ToVector4());
+        shaderProgram.SetUniform4("uColor2", Color.Blue.ToVector4());
+        shaderProgram.Use();
+        obj.VAO.Bind();
     }
 }
