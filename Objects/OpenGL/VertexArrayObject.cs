@@ -1,7 +1,6 @@
-﻿using ProjectNewWorld.Core.Objects;
-using Silk.NET.OpenGL;
+﻿using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.Objects.OpenGL;
+namespace Core.Objects.OpenGL;
 
 public class VertexArrayObject : DisposableObject
 {

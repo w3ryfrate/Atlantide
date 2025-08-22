@@ -1,9 +1,7 @@
-﻿using ProjectNewWorld.Core.Helpers;
-using ProjectNewWorld.Core.Objects;
-using System.Diagnostics;
+﻿using Core.Helpers;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Cameras;
+namespace Core.Cameras;
 
 public abstract class BaseCamera
 {

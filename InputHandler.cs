@@ -2,7 +2,7 @@
 
 using Silk.NET.Input;
 
-namespace ProjectNewWorld.Core.Input;
+namespace Core.Input;
 
 public class InputHandler
 {

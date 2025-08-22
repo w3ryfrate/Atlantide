@@ -1,22 +1,26 @@
-﻿using ProjectNewWorld.Core.Objects;
+﻿
 using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.Objects.OpenGL;
+namespace Core.Objects.OpenGL;
 
 public class Shader : DisposableObject
 {
     public uint Handle { get; private set; }
     public ShaderType Type { get; private set; }
-    private bool _disposed = false;
+
+    private readonly string _path;
+    private readonly Game _game;
     private readonly GL _gl;
 
-    public Shader(GL gl, string file, ShaderType type)
+    public Shader(Game game, string file, ShaderType type)
     {
-        _gl = gl;
+        _game = game;
+        _gl = game.GL;
+        _path = file;
         Handle = _gl.CreateShader(type);
         Type = type;
         _gl.ShaderSource(Handle, File.ReadAllText(file));
-        Compile();
+        this.Compile();
     }
 
     private void Compile()
@@ -25,7 +29,7 @@ public class Shader : DisposableObject
         _gl.GetShader(Handle, ShaderParameterName.CompileStatus, out int compStatus);
         if (compStatus == (int)GLEnum.False)
         {
-            throw new Exception(_gl.GetShaderInfoLog(Handle));
+            _game.ConsoleLogger.LogFatal($"Shader:{_path} compilation error: {_gl.GetShaderInfoLog(Handle)}");
         }
     }
 
@@ -46,7 +50,7 @@ public class Shader : DisposableObject
 
     protected override void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (Disposed)
             return;
 
         if (disposing)
@@ -55,6 +59,6 @@ public class Shader : DisposableObject
         }
 
         Delete();
-        _disposed = true;
+        Disposed = true;
     }
 }

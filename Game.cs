@@ -4,23 +4,21 @@ using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
 using System.Numerics;
 using System.Drawing;
-using Shader = ProjectNewWorld.Core.Objects.OpenGL.Shader;
+using Shader = Core.Objects.OpenGL.Shader;
 using Silk.NET.Input;
-using ProjectNewWorld.Core.Cameras;
-using ProjectNewWorld.Core.Input;
-using ProjectNewWorld.Core.Objects;
-using ProjectNewWorld.Core.Objects.OpenGL;
-using Core;
+using Core.Cameras;
+using Core.Input;
+using Core.Objects;
 using Core.Objects.OpenGL;
 
-namespace ProjectNewWorld.Core;
+namespace Core;
 
 public class Game
 {
     public readonly IWindow MainWindow;
 
     public GL GL { get; private set; }
-    public GraphicsHandler GraphicsHandler { get; private set; }
+    public GraphicsHandler Renderer { get; private set; }
     public InputHandler InputHandler { get; private set; }
     public BaseCamera Camera { get; private set; }
     public ConsoleLogger ConsoleLogger { get; private set; }
@@ -62,30 +60,22 @@ public class Game
 
         Camera = new FreeViewCamera(this, new(0, 0, 5), -Vector3.UnitZ, 10f);
 
-        GraphicsHandler = new(this);
-        GraphicsHandler.SetViewport(new(1080, 750));
+        ShaderProgramFactory.CreatePrograms(this);
 
-        vertShader = new(GL, "Assets\\Shaders\\plain_vert.shader", ShaderType.VertexShader);
-        fragShader = new(GL, "Assets\\Shaders\\gradient_frag.shader", ShaderType.FragmentShader);
+        Renderer = new(this);
+        Renderer.SetViewport(new(1080, 750));
+
+        vertShader = new(this, "Assets\\Shaders\\plain_vert.shader", ShaderType.VertexShader);
+        fragShader = new(this, "Assets\\Shaders\\gradient_frag.shader", ShaderType.FragmentShader);
 
         shaderProgram = new(this, vertShader, fragShader);
 
         vertShader.Dispose();
         fragShader.Dispose();
 
-        for (int i = 0; i < _renderableObjects.Length; i++)
-        {
-            if (i == 0)
-            {
-                Objects.Triangle triangle = new(this, new(Vector3.Zero));
-                _renderableObjects[i] = triangle;
-            }
-            else
-            {
-                Objects.Rectangle rect = new(this, new(Vector3.UnitX * i));
-                _renderableObjects[i] = rect;
-            }
-        }
+        _renderableObjects[0] = new Triangle(this, new(Vector3.Zero));
+        _renderableObjects[1] = new Objects.Rectangle(this, new(Vector3.UnitX));
+        _renderableObjects[2] = new Voxel(this, new(Vector3.UnitX * 2, Vector3.Zero, 0.5f));
     }
 
     private void OnUpdate(double delta)
@@ -100,18 +90,27 @@ public class Game
 
     private void OnRender(double delta)
     {
-        GraphicsHandler.Clear(Color.CornflowerBlue);
+        Renderer.Clear(Color.CornflowerBlue);
 
         foreach (var obj in _renderableObjects)
         {
-            if (obj is Objects.Rectangle)
+            if (obj is Voxel)
             {
-                GraphicsHandler.DrawRectangle(obj as Objects.Rectangle, shaderProgram);
+                Voxel voxel = obj as Voxel;
+                Renderer.DrawObject(voxel, shaderProgram);
             }
-            else 
-                GraphicsHandler.DrawTriangle(obj as Triangle, shaderProgram);
+            else if (obj is Triangle)
+            {
+                Triangle triangle = obj as Triangle;
+                Renderer.DrawObject(triangle, shaderProgram);
+            }
+            else if (obj is Objects.Rectangle)
+            {
+                Objects.Rectangle rect = obj as Objects.Rectangle;
+                Renderer.DrawObject(rect, shaderProgram);
+            }
         }
-
+        
         MainWindow.SwapBuffers();
     }
 }

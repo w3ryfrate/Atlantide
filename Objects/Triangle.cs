@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace ProjectNewWorld.Core.Objects;
+namespace Core.Objects;
 
 public class Triangle : RenderableObject
 {
@@ -12,7 +12,7 @@ public class Triangle : RenderableObject
         0.0f, 0.5f, 0.0f,   0.5f, 1.0f,
     };
 
-    public Triangle(Game engine, Transform transform) : base(engine, transform)
+    public Triangle(Game game, Transform transform) : base(game, transform)
     {
         VAO.Bind();
 

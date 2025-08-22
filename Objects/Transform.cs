@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace ProjectNewWorld.Core.Objects;
+namespace Core.Objects;
 
 public class Transform
 {
@@ -57,6 +57,12 @@ public class Transform
         Position = position;
         Rotation = Vector3.Zero;
         Scale = 1f;
+    }
+    public Transform(Vector3 position, Vector3 rotation, float scale)
+    {
+        Position = position;
+        Rotation = rotation;
+        Scale = scale;
     }
 
     public Matrix4x4 GetModel()

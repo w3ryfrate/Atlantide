@@ -1,10 +1,9 @@
-﻿using ProjectNewWorld.Core.Helpers;
-using ProjectNewWorld.Core.Input;
+﻿using Core.Helpers;
+using Core.Input;
 using Silk.NET.Input;
-using System.Diagnostics;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Cameras;
+namespace Core.Cameras;
 
 public class FreeViewCamera : BaseCamera
 {

@@ -1,8 +1,8 @@
-﻿using ProjectNewWorld.Core.Objects.OpenGL;
+﻿using Core.Objects.OpenGL;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Objects;
+namespace Core.Objects;
 
 public abstract class RenderableObject : DisposableObject
 {
@@ -17,15 +17,15 @@ public abstract class RenderableObject : DisposableObject
     public readonly EventHandler<EventArgs> BeforeDraw;
 
     protected readonly GL gl;
-    protected readonly Game Engine;
+    protected readonly Game Game;
     protected abstract float[] VertexBufferData { get; }
 
     public Matrix4x4 Model => this.Transform.GetModel();
 
-    public RenderableObject(Game engine, Transform transform)
+    public RenderableObject(Game game, Transform transform)
     {
-        this.Engine = engine;
-        this.gl = engine.GL;
+        this.Game = game;
+        this.gl = game.GL;
 
         this.VAO = new(gl);
         this.VBO = new(gl, BufferTargetARB.ArrayBuffer);

@@ -1,16 +1,18 @@
 ﻿using Core;
 using Core.Objects.OpenGL;
-using ProjectNewWorld.Core.Helpers;
+using Core.Helpers;
 using Silk.NET.OpenGL;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Objects.OpenGL;
+namespace Core.Objects.OpenGL;
 
 public class ShaderProgram : DisposableObject
 {
     public uint Handle { get; private set; }
     public readonly Shader VertexShader;
     public readonly Shader FragmentShader;
+
+    private static readonly Dictionary<ShaderProgramType, ShaderProgram> _shaderPrograms = new();
 
     private readonly Game _game;
     private readonly GL _gl;
@@ -25,7 +27,7 @@ public class ShaderProgram : DisposableObject
         this.FragmentShader = fragmentShader;
 
         if (VertexShader.Disposed) game.ConsoleLogger.LogFatal("Cannot use a disposed vertex shader!");
-        else if (VertexShader.Disposed)game.ConsoleLogger.LogFatal("Cannot use a disposed fragment shader!");
+        else if (VertexShader.Disposed) game.ConsoleLogger.LogFatal("Cannot use a disposed fragment shader!");
 
         _gl.AttachShader(Handle, VertexShader.Handle);
         _gl.AttachShader(Handle, FragmentShader.Handle);

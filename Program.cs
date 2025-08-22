@@ -1,6 +1,6 @@
-﻿using ProjectNewWorld.Core;
+﻿using Core;
 
-namespace ProjectNewWorld;
+namespace Core;
 
 class Program
 {

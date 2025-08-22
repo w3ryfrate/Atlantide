@@ -1,12 +1,11 @@
 ﻿using Core.Objects.OpenGL;
-using ProjectNewWorld.Core.Helpers;
-using ProjectNewWorld.Core.Objects;
-using ProjectNewWorld.Core.Objects.OpenGL;
+using Core.Helpers;
+using Core.Objects;
 using Silk.NET.OpenGL;
 using System.Drawing;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core;
+namespace Core;
 
 public class GraphicsHandler
 {
@@ -48,30 +47,38 @@ public class GraphicsHandler
         _toUpdate.Clear();
     }
 
-    public void DrawRectangle(Objects.Rectangle rect, ShaderProgram shaderProgram)
+    public void DrawObject(Objects.Rectangle rect, ShaderProgram shaderProgram)
     {
         if (rect.Disposed)
             return;
 
         _toUpdate.Add(rect);
-        PrepareDrawing(rect, shaderProgram);
+        UseShaderProgram(rect, shaderProgram);
         unsafe
         {
             _gl.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
         }
     }
-
-    public void DrawTriangle(Triangle triangle, ShaderProgram shaderProgram)
+    public void DrawObject(Triangle triangle, ShaderProgram shaderProgram)
     {
         if (triangle.Disposed)
             return;
 
         _toUpdate.Add(triangle);
-        PrepareDrawing(triangle, shaderProgram);
+        UseShaderProgram(triangle, shaderProgram);
         _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
     }
+    public void DrawObject(Voxel voxel, ShaderProgram shaderProgram)
+    {
+        if (voxel.Disposed)
+            return;
 
-    private void PrepareDrawing(RenderableObject obj, ShaderProgram shaderProgram)
+        _toUpdate.Add(voxel);
+        UseShaderProgram(voxel, shaderProgram);
+        _gl.DrawArrays(PrimitiveType.Triangles, 0, 36);
+    }
+
+    private void UseShaderProgram(RenderableObject obj, ShaderProgram shaderProgram)
     {
         shaderProgram.SetUniformMat4("uMVP", obj.Model * _game.Camera.View * Projection);
         shaderProgram.SetUniform4("uColor1", Color.Red.ToVector4());

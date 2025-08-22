@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 
-namespace ProjectNewWorld.Core.Helpers;
+namespace Core.Helpers;
 
 public static class MathHelper
 {

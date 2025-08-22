@@ -1,8 +1,7 @@
-﻿using ProjectNewWorld.Core.Objects.OpenGL;
+﻿using Core.Objects.OpenGL;
 using Silk.NET.OpenGL;
-using System.Numerics;
 
-namespace ProjectNewWorld.Core.Objects;
+namespace Core.Objects;
 
 public class Rectangle : RenderableObject
 {
@@ -24,7 +23,7 @@ public class Rectangle : RenderableObject
         0u, 3u, 2u
     };
 
-    public Rectangle(Game engine, Transform transform) : base(engine, transform)
+    public Rectangle(Game game, Transform transform) : base(game, transform)
     {
         VAO.Bind();
 

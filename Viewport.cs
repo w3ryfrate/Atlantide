@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace ProjectNewWorld.Core;
+namespace Core;
 
 public readonly struct Viewport
 {
